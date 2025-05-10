@@ -9,24 +9,23 @@ import {
   LAMPORTS_PER_SOL,
 } from '@solana/web3.js';
 import {
-  getAssociatedTokenAddress,
-  getOrCreateAssociatedTokenAccount,
   getAccount,
   getMint,
   createTransferCheckedInstruction,
-  TOKEN_PROGRAM_ID,
   getAssociatedTokenAddressSync,
 } from '@solana/spl-token';
+import { createMemoInstruction } from "@solana/spl-memo";
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useWalletContext } from '../wallet-context';
 
 export const TokenTransferForm = () => {
-  const { publicKey, signTransaction } = useWallet();
+  const { publicKey, signTransaction, sendTransaction, connected } = useWallet();
   const { network } = useWalletContext();
   const [connection, setConnection] = useState<Connection | null>(null);
   const [mintAddress, setMintAddress] = useState('');
   const [recipientAddress, setRecipientAddress] = useState('');
   const [amount, setAmount] = useState('');
+  const [txMemo, setTxMemo] = useState('');
   const [balance, setBalance] = useState<number | null>(null);
   const [decimals, setDecimals] = useState<number | null>(null);
   const [status, setStatus] = useState('');
@@ -61,7 +60,7 @@ export const TokenTransferForm = () => {
   }, [connection, publicKey, mintAddress]);
 
   const handleTransfer = async () => {
-    if (!connection || !publicKey || !signTransaction) {
+    if (!connected || !publicKey || !connection) {
       setStatus('Wallet not connected.');
       return;
     }
@@ -69,13 +68,13 @@ export const TokenTransferForm = () => {
     try {
       const mintPubkey = new PublicKey(mintAddress);
       const recipientPubkey = new PublicKey(recipientAddress);
-      const senderATA = await getAssociatedTokenAddress(mintPubkey, publicKey);
-      const recipientATA = await getAssociatedTokenAddress(mintPubkey, recipientPubkey);
+      const senderATA = getAssociatedTokenAddressSync(mintPubkey, publicKey);
+      const recipientATA = getAssociatedTokenAddressSync(mintPubkey, recipientPubkey);
 
       const mintInfo = await getMint(connection, mintPubkey);
       const transferAmount = Number(amount) * 10 ** mintInfo.decimals;
 
-      const transaction = new Transaction().add(
+      let transaction = new Transaction().add(
         createTransferCheckedInstruction(
           senderATA,
           mintPubkey,
@@ -85,9 +84,10 @@ export const TokenTransferForm = () => {
           mintInfo.decimals
         )
       );
-
-      const signed = await signTransaction(transaction);
-      const signature = await connection.sendRawTransaction(signed.serialize());
+      if(txMemo) {
+        transaction = transaction.add(createMemoInstruction(txMemo));
+      }
+      const signature = await sendTransaction(transaction, connection);
       await connection.confirmTransaction(signature, 'confirmed');
 
       setStatus(`Transfer successful. Transaction signature: ${signature}`);
@@ -120,6 +120,15 @@ export const TokenTransferForm = () => {
           type="text"
           value={recipientAddress}
           onChange={(e) => setRecipientAddress(e.target.value)}
+          style={{ width: '100%' }}
+        />
+      </div>
+      <div>
+        <label>Transaction Memo:</label>
+        <input
+          type="text"
+          value={txMemo}
+          onChange={(e) => setTxMemo(e.target.value)}
           style={{ width: '100%' }}
         />
       </div>
