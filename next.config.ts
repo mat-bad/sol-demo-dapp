@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 
-const isProd = false;//process.env.NODE_ENV === 'production';
+const isProd = true;//process.env.NODE_ENV === 'production';
 
 
 const nextConfig: NextConfig = {
