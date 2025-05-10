@@ -1,27 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState} from 'react';
 import {
-  Connection,
   PublicKey,
   Transaction,
-  clusterApiUrl,
-  LAMPORTS_PER_SOL,
   SystemProgram,
 } from '@solana/web3.js';
-import { useWalletContext } from '../wallet-context';
 import {
   useWallet,
   useConnection
 } from '@solana/wallet-adapter-react';
-import {
-  WalletMultiButton
-} from '@solana/wallet-adapter-react-ui';
-// import { ClusterSwitcher } from './components/ClusterSwitcher';
-// import { SolBalance } from './components/SolBalance';
-// import { TokenTransferForm } from './components/TokenTransferForm';
-
-
 
 export const SolTransferForm = () => {
   const { connection } = useConnection();

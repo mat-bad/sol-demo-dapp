@@ -1,7 +1,7 @@
 'use client';
 
 import { ReactNode, useMemo, useState, createContext, useContext } from 'react';
-import { clusterApiUrl, Connection } from '@solana/web3.js';
+import { clusterApiUrl} from '@solana/web3.js';
 import {
   ConnectionProvider,
   WalletProvider
@@ -34,7 +34,7 @@ export const WalletContextProvider = ({ children }: { children: ReactNode }) => 
 
   const wallets = useMemo(
     () => [],
-    [network]
+    []
   );
 
   return (

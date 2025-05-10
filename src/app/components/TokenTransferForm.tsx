@@ -6,7 +6,6 @@ import {
   PublicKey,
   Transaction,
   clusterApiUrl,
-  LAMPORTS_PER_SOL,
 } from '@solana/web3.js';
 import {
   getAccount,
@@ -19,7 +18,7 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { useWalletContext } from '../wallet-context';
 
 export const TokenTransferForm = () => {
-  const { publicKey, signTransaction, sendTransaction, connected } = useWallet();
+  const { publicKey, sendTransaction, connected } = useWallet();
   const { network } = useWalletContext();
   const [connection, setConnection] = useState<Connection | null>(null);
   const [mintAddress, setMintAddress] = useState('');
